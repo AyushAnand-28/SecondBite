@@ -46,6 +46,15 @@ app.use("/api/stores", storeRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 
+// Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    message: err.message || "An unexpected error occurred",
+    error: process.env.NODE_ENV === "development" ? err : {},
+  });
+});
+
 // 404 fallback
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
