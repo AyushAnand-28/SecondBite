@@ -93,7 +93,7 @@ const updateProfile = async (req, res) => {
     user.phone = req.body.phone || user.phone;
     
     if (req.file) {
-      user.avatarUrl = `/uploads/${req.file.filename}`;
+      user.avatarUrl = req.file.path;
     }
     
     // Only update password if provided
