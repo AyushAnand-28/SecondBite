@@ -34,7 +34,9 @@ const placeOrder = async (req, res) => {
         name: product.name,
         imageUrl: product.imageUrl,
         price: product.price,
+        originalPrice: product.originalPrice || product.price,
         quantity: item.quantity,
+        unit: product.unit,
       });
 
       totalPrice += product.price * item.quantity;
@@ -109,4 +111,39 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-export { placeOrder, getMyOrders, getStoreOrders, updateOrderStatus };
+// @desc    Cancel an order (consumer only, PENDING orders only)
+// @route   PATCH /api/orders/:id/cancel
+// @access  Private (CONSUMER)
+const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // Ensure the order belongs to this consumer
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorised to cancel this order" });
+    }
+
+    if (order.status !== "PENDING") {
+      return res.status(400).json({ message: `Cannot cancel an order that is already ${order.status.toLowerCase()}` });
+    }
+
+    // Restock products
+    for (const item of order.items) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity += item.quantity;
+        if (product.status === "SOLD_OUT" && product.quantity > 0) product.status = "AVAILABLE";
+        await product.save();
+      }
+    }
+
+    order.status = "CANCELLED";
+    await order.save();
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export { placeOrder, getMyOrders, getStoreOrders, updateOrderStatus, cancelOrder };

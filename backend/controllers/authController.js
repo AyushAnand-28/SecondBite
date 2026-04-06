@@ -35,6 +35,7 @@ const register = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatarUrl: user.avatarUrl,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -63,6 +64,7 @@ const login = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatarUrl: user.avatarUrl,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -77,4 +79,41 @@ const getMe = async (req, res) => {
   res.json(req.user);
 };
 
-export { register, login, getMe };
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.name = req.body.name || user.name;
+    user.phone = req.body.phone || user.phone;
+    
+    if (req.file) {
+      user.avatarUrl = `/uploads/${req.file.filename}`;
+    }
+    
+    // Only update password if provided
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      phone: updatedUser.phone,
+      avatarUrl: updatedUser.avatarUrl,
+      token: generateToken(updatedUser._id) // optionally return a fresh token
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export { register, login, getMe, updateProfile };

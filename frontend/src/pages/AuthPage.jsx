@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Leaf } from 'lucide-react';
 
 export default function AuthPage() {
   const [searchParams] = useSearchParams();
@@ -17,7 +18,7 @@ export default function AuthPage() {
   const validate = () => {
     const e = {};
     if (!form.email) e.email = 'Email is required';
-    else if (!/\\S+@\\S+\\.\\S+/.test(form.email)) e.email = 'Invalid email format';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Invalid email format';
     if (!form.password) e.password = 'Password is required';
     else if (form.password.length < 6) e.password = 'Password must be at least 6 characters';
     if (tab === 'register') {
@@ -57,7 +58,7 @@ export default function AuthPage() {
         {/* Logo Header */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-            <div style={{ width: 44, height: 44, background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: '#fff' }}>🥦</div>
+            <div style={{ width: 44, height: 44, background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><Leaf size={24} strokeWidth={1.5} /></div>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.8rem', color: 'var(--primary)', letterSpacing: '-0.5px' }}>SECONDBITE</span>
           </Link>
           <div style={{ marginTop: 12 }}>

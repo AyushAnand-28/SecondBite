@@ -11,6 +11,14 @@ if (token) {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
 
+// Request interceptor - handle FormData Content-Type
+api.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+  return config;
+});
+
 // Response interceptor – handle 401
 api.interceptors.response.use(
   res => res,

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
 import api from '../services/api';
+import { Utensils } from 'lucide-react';
 
 const CATEGORIES = ['ALL', 'BAKERY', 'PRODUCE', 'DAIRY', 'MEAT', 'SEAFOOD', 'PANTRY', 'PREPARED'];
 const SORT_OPTIONS = [
@@ -122,7 +123,7 @@ export default function BrowsePage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">🍽️</div>
+            <div className="empty-icon" style={{ color: 'var(--outline-variant)' }}><Utensils size={64} strokeWidth={1} /></div>
             <h3 className="title-md mb-2">No products found</h3>
             <p className="body-md text-muted" style={{ fontStyle: 'italic' }}>Try adjusting your search or filters.</p>
           </div>

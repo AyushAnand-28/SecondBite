@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import api from '../services/api';
+import { Store, MapPin, CheckCircle, Zap, Croissant, Carrot, Milk, Beef, Fish, ShoppingBag, UtensilsCrossed, Utensils } from 'lucide-react';
 
 /* ── static data ── */
 const HOW_STEPS = [
@@ -26,10 +27,10 @@ const MARQUEE_ITEMS = [
   'Support Local, Shop Smart',
 ];
 
-const CAT_EMOJI = {
-  BAKERY: '🥖', PRODUCE: '🥦', DAIRY: '🧀',
-  MEAT: '🥩', SEAFOOD: '🐟', PANTRY: '🛒',
-  PREPARED: '🍱', OTHER: '🍽️',
+const CATEGORY_ICON = {
+  BAKERY: <Croissant size={28} strokeWidth={1} />, PRODUCE: <Carrot size={28} strokeWidth={1} />, DAIRY: <Milk size={28} strokeWidth={1} />,
+  MEAT: <Beef size={28} strokeWidth={1} />, SEAFOOD: <Fish size={28} strokeWidth={1} />, PANTRY: <ShoppingBag size={28} strokeWidth={1} />,
+  PREPARED: <UtensilsCrossed size={28} strokeWidth={1} />, OTHER: <Utensils size={28} strokeWidth={1} />,
 };
 
 const DEMO_STORES = [
@@ -310,18 +311,18 @@ function StoresSection({ stores }) {
                     background: 'var(--surface-low)',
                     border: '1px solid var(--outline-subtle)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1.6rem',
+                    color: 'var(--primary)'
                   }}>
-                    {CAT_EMOJI[store.category] || '🏪'}
+                    {CATEGORY_ICON[store.category] || <Store size={28} strokeWidth={1} />}
                   </div>
                   {store.discount && (
                     <span className="badge badge-discount">{store.discount}% OFF</span>
                   )}
                 </div>
                 <h3 className="title-md" style={{ marginBottom: 6, color: 'var(--on-surface)' }}>{store.name}</h3>
-                <div className="label-sm" style={{ color: 'var(--on-surface-variant)', marginBottom: 14 }}>📍 {store.city}</div>
+                <div className="label-sm" style={{ color: 'var(--on-surface-variant)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {store.city}</div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {store.isVerified && <span className="badge badge-green">✓ Verified</span>}
+                  {store.isVerified && <span className="badge badge-green" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><CheckCircle size={10} /> Verified</span>}
                   <span className="badge badge-amber">{store.category || 'STORE'}</span>
                 </div>
               </Link>

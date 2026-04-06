@@ -37,14 +37,19 @@ export function CartProvider({ children }) {
 
   const clearCart = () => setItems([]);
 
-  const storeId = items.length > 0 ? items[0].product.store?._id || items[0].product.store : null;
+  const clearStoreCart = (storeId) =>
+    setItems(prev => prev.filter(i => {
+      const sid = i.product.store?._id || i.product.store;
+      return sid?.toString() !== storeId?.toString();
+    }));
 
   const total = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   const originalTotal = items.reduce((sum, i) => sum + (i.product.originalPrice || i.product.price) * i.quantity, 0);
   const savings = originalTotal - total;
+  const count = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQty, clearCart, total, savings, storeId, count: items.reduce((sum, i) => sum + i.quantity, 0) }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQty, clearCart, clearStoreCart, total, savings, count }}>
       {children}
     </CartContext.Provider>
   );

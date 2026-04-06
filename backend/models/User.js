@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema(
       enum: ["CONSUMER", "STORE_OWNER", "ADMIN"],
       default: "CONSUMER",
     },
+    avatarUrl: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

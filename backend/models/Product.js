@@ -30,6 +30,10 @@ const productSchema = new mongoose.Schema(
       required: [true, "Quantity is required"],
       min: 0,
     },
+    unit: {
+      type: String,
+      default: "item",
+    },
     expiryDate: {
       type: Date,
       required: [true, "Expiry date is required"],

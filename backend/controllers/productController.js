@@ -6,7 +6,8 @@ import Store from "../models/Store.js";
 // @access  Private (STORE_OWNER)
 const createProduct = async (req, res) => {
   try {
-    const { name, description, imageUrl, price, originalPrice, quantity, expiryDate, category, storeId } = req.body;
+    const { name, description, price, originalPrice, quantity, unit, expiryDate, category, storeId } = req.body;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl || null;
 
     if (!name || !price || !originalPrice || !quantity || !expiryDate || !storeId) {
       return res.status(400).json({ message: "name, price, originalPrice, quantity, expiryDate, and storeId are required" });
@@ -21,7 +22,7 @@ const createProduct = async (req, res) => {
 
     const product = await Product.create({
       name, description, imageUrl, price, originalPrice,
-      quantity, expiryDate, category, store: storeId,
+      quantity, unit, expiryDate, category, store: storeId,
     });
 
     res.status(201).json(product);
@@ -75,10 +76,16 @@ const updateProduct = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to update this product" });
     }
 
-    const fields = ["name", "description", "imageUrl", "price", "originalPrice", "quantity", "expiryDate", "category", "status"];
+    const fields = ["name", "description", "price", "originalPrice", "quantity", "unit", "expiryDate", "category", "status"];
     fields.forEach((field) => {
       if (req.body[field] !== undefined) product[field] = req.body[field];
     });
+
+    if (req.file) {
+      product.imageUrl = `/uploads/${req.file.filename}`;
+    } else if (req.body.imageUrl !== undefined) {
+      product.imageUrl = req.body.imageUrl;
+    }
 
     const updated = await product.save();
     res.json(updated);

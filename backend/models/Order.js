@@ -17,12 +17,20 @@ const orderItemSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: true, // snapshot of price at time of order
+      required: true, // snapshot of sale price at time of order
+    },
+    originalPrice: {
+      type: Number,
+      default: null, // snapshot of original price for savings calculation
     },
     quantity: {
       type: Number,
       required: true,
       min: 1,
+    },
+    unit: {
+      type: String,
+      default: "item",
     },
   },
   { _id: false } // embedded sub-document, no separate _id needed

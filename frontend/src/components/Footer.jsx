@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Leaf } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -8,7 +9,7 @@ export default function Footer() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <div style={{ width: 44, height: 44, background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                <span style={{ color: '#fff' }}>🥦</span>
+                <span style={{ color: '#fff', display: 'flex' }}><Leaf size={24} strokeWidth={1.5} /></span>
               </div>
               <span className="footer-logo-big" style={{ fontSize: '1.8rem' }}>SECONDBITE</span>
             </div>
