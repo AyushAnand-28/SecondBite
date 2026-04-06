@@ -7,17 +7,45 @@ import Order from "./models/Order.js";
 
 dotenv.config();
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  SAFETY GUARD
+//  This script WIPES and re-seeds the database.
+//  It will refuse to run unless the environment explicitly opts in.
+//
+//  Usage (local dev only):
+//    SEED_CONFIRM=true node seed.js
+// ─────────────────────────────────────────────────────────────────────────────
+if (process.env.NODE_ENV === "production" && process.env.SEED_CONFIRM !== "true") {
+  console.error(
+    "\n❌  Refusing to seed: NODE_ENV is 'production'.\n" +
+    "   If you really intend to wipe and re-seed the production database,\n" +
+    "   set SEED_CONFIRM=true explicitly.\n"
+  );
+  process.exit(1);
+}
+
+if (process.env.SEED_CONFIRM !== "true") {
+  console.error(
+    "\n❌  Refusing to seed: SEED_CONFIRM is not set to 'true'.\n" +
+    "   Run with:  SEED_CONFIRM=true node seed.js\n" +
+    "   WARNING: This will DELETE all existing data.\n"
+  );
+  process.exit(1);
+}
+
+console.log("⚠️  SEED_CONFIRM=true detected. Wiping and re-seeding the database...\n");
+
 const seedData = async () => {
   try {
     await mongoose.connect(process.env.DATABASE_URL || "mongodb://localhost:27017/secondbite");
-    console.log("Connected to MongoDB database.");
+    console.log("✅ Connected to MongoDB.");
 
     // Clear existing data
     await User.deleteMany();
     await Store.deleteMany();
     await Product.deleteMany();
     await Order.deleteMany();
-    console.log("Cleared existing data.");
+    console.log("🗑️  Cleared existing data.");
 
     // Create Users
     const consumer = new User({
@@ -27,7 +55,7 @@ const seedData = async () => {
       role: "CONSUMER",
       phone: "1234567890"
     });
-    await consumer.save(); // pre('save') should handle bcrypt
+    await consumer.save();
 
     const storeOwner1 = new User({
       name: "Ravi Owner",
@@ -37,7 +65,7 @@ const seedData = async () => {
       phone: "0987654321"
     });
     await storeOwner1.save();
-    
+
     // Create Stores
     const store1 = await Store.create({
       name: "Da Maria Bakery",
@@ -65,7 +93,7 @@ const seedData = async () => {
         price: 45,
         originalPrice: 130,
         quantity: 8,
-        expiryDate: new Date(Date.now() + 86400000), // tomorrow
+        expiryDate: new Date(Date.now() + 86400000),
         category: "BAKERY",
         store: store1._id
       },
@@ -85,7 +113,7 @@ const seedData = async () => {
         price: 20,
         originalPrice: 50,
         quantity: 15,
-        expiryDate: new Date(Date.now() + 86400000), // tomorrow
+        expiryDate: new Date(Date.now() + 86400000),
         category: "PRODUCE",
         store: store2._id
       },
@@ -102,7 +130,7 @@ const seedData = async () => {
     ]);
 
     // Create Orders
-    const order1 = await Order.create({
+    await Order.create({
       user: consumer._id,
       store: store1._id,
       items: [
@@ -118,7 +146,7 @@ const seedData = async () => {
       note: "Please pack well."
     });
 
-    const order2 = await Order.create({
+    await Order.create({
       user: consumer._id,
       store: store2._id,
       items: [
@@ -133,10 +161,10 @@ const seedData = async () => {
       status: "CONFIRMED"
     });
 
-    console.log("Dummy data seeded successfully.");
+    console.log("✅ Sample data seeded successfully.");
     process.exit(0);
   } catch (error) {
-    console.error("Error seeding data:", error);
+    console.error("❌ Error seeding data:", error);
     process.exit(1);
   }
 };

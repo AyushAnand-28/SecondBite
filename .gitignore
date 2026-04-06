@@ -1,8 +1,15 @@
 node_modules/
 dist/
 build/
+
+# Root .env and all nested .env files
 .env
 .env.*
 !.env.example
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+
 .DS_Store
 Thumbs.db
