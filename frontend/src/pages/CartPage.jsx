@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { useToast } from '../components/Toast';
 import { ShoppingCart, PartyPopper, Globe, Croissant, Carrot, Milk, Beef, Fish, ShoppingBag, UtensilsCrossed, Utensils, Store, Leaf, CheckCircle, Loader, Zap, X } from 'lucide-react';
 
 const CATEGORY_ICON = {
@@ -16,6 +17,7 @@ export default function CartPage() {
   const { items, removeItem, updateQty, clearCart, clearStoreCart, total, savings } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [form, setForm] = useState({ name: user?.name || '', phone: user?.phone || '', address: '', note: '' });
   const [errors, setErrors] = useState({});
@@ -61,7 +63,7 @@ export default function CartPage() {
         _capturedSavings: storeSavings,
       }]);
     } catch (err) {
-      alert(err.response?.data?.message || 'Order placement failed. Please try again.');
+      toast.error(err.response?.data?.message || 'Order placement failed. Please try again.');
     } finally {
       setPlacing(null);
     }

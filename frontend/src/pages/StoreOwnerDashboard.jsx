@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { useToast } from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import { Package, TrendingUp, Croissant, Carrot, Milk, Beef, Fish, ShoppingBag, UtensilsCrossed, Utensils, Zap, Clock, Store, MapPin, Search, FileText, CheckCircle, XCircle, LayoutDashboard, Receipt, User, Edit, Trash2, PartyPopper } from 'lucide-react';
 
 const CATEGORIES = ['BAKERY', 'PRODUCE', 'DAIRY', 'MEAT', 'SEAFOOD', 'PANTRY', 'PREPARED', 'OTHER'];
@@ -101,6 +103,7 @@ function ProductForm({ initial, onSave, onCancel }) {
 export default function StoreOwnerDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [products, setProducts] = useState([]);
   const [storeOrders, setStoreOrders] = useState([]);
@@ -110,6 +113,7 @@ export default function StoreOwnerDashboard() {
   const [editProduct, setEditProduct] = useState(null);
   const [showEditStore, setShowEditStore] = useState(false);
   const [storeForm, setStoreForm] = useState({ name: '', city: '', description: '', address: '' });
+  const [confirmState, setConfirmState] = useState(null);
 
   const handleUpdateStore = async (e) => {
     e.preventDefault();
@@ -122,8 +126,9 @@ export default function StoreOwnerDashboard() {
         setStore(data);
       }
       setShowEditStore(false);
+      toast.success('Store profile updated!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Store update failed');
+      toast.error(err.response?.data?.message || 'Store update failed');
     }
   };
 
@@ -155,25 +160,33 @@ export default function StoreOwnerDashboard() {
       if (id) {
         const { data } = await api.put(`/products/${id}`, formData);
         setProducts(ps => ps.map(p => p._id === id ? data : p));
+        toast.success('Product updated successfully!');
       } else {
         if (!store?._id) {
-          alert('You must set up your Store Identity (Profile tab) before adding products!');
+          toast.warning('Set up your Store Identity (Profile tab) before adding products.');
           return;
         }
         formData.append('storeId', store._id);
         const { data } = await api.post('/products', formData);
         setProducts(ps => [...ps, data.product || data]);
+        toast.success('Product added to inventory!');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Could not save product');
+      toast.error(err.response?.data?.message || 'Could not save product');
     }
     setShowForm(false); setEditProduct(null);
   };
 
-  const handleDeleteProduct = async (id) => {
-    if (!confirm('Delete this product?')) return;
-    try { await api.delete(`/products/${id}`); } catch { }
-    setProducts(ps => ps.filter(p => p._id !== id));
+  const handleDeleteProduct = (id) => {
+    setConfirmState({
+      message: 'Delete this product? This action cannot be undone.',
+      confirmLabel: 'Delete Product',
+      onConfirm: async () => {
+        try { await api.delete(`/products/${id}`); } catch { }
+        setProducts(ps => ps.filter(p => p._id !== id));
+        toast.success('Product removed from inventory.');
+      },
+    });
   };
 
   const handleStatusUpdate = async (orderId, status) => {
@@ -199,6 +212,12 @@ export default function StoreOwnerDashboard() {
 
   return (
     <div className="dashboard-layout">
+      {confirmState && (
+        <ConfirmModal
+          {...confirmState}
+          onCancel={() => setConfirmState(null)}
+        />
+      )}
       {showForm && (
         <ProductForm
           initial={editProduct}

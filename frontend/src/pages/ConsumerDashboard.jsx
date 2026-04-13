@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { useToast } from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import { Clock, CheckCircle, PartyPopper, XCircle, Package, Scale, Coins, Globe, LayoutDashboard, ShoppingCart, User, Leaf } from 'lucide-react';
 
 const STATUS_BADGE = {
@@ -23,12 +25,14 @@ const DEMO_ORDERS = [
 export default function ConsumerDashboard() {
   const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({ name: '', phone: '' });
   const [avatarFile, setAvatarFile] = useState(null);
+  const [confirmState, setConfirmState] = useState(null);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -41,8 +45,9 @@ export default function ConsumerDashboard() {
       const { data } = await api.put('/auth/profile', formData);
       updateProfile(data);
       setShowEditProfile(false);
+      toast.success('Profile updated successfully!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Update failed');
+      toast.error(err.response?.data?.message || 'Update failed');
     }
   };
 
@@ -53,14 +58,20 @@ export default function ConsumerDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleCancelOrder = async (orderId) => {
-    if (!confirm('Cancel this order? The items will be restocked.')) return;
-    try {
-      const { data } = await api.patch(`/orders/${orderId}/cancel`);
-      setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: data.status } : o));
-    } catch (err) {
-      alert(err.response?.data?.message || 'Could not cancel order.');
-    }
+  const handleCancelOrder = (orderId) => {
+    setConfirmState({
+      message: 'Cancel this order? The items will be restocked.',
+      confirmLabel: 'Yes, Cancel Order',
+      onConfirm: async () => {
+        try {
+          const { data } = await api.patch(`/orders/${orderId}/cancel`);
+          setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: data.status } : o));
+          toast.success('Order cancelled. Items have been restocked.');
+        } catch (err) {
+          toast.error(err.response?.data?.message || 'Could not cancel order.');
+        }
+      },
+    });
   };
 
   const displayOrders = orders.length > 0 ? orders : DEMO_ORDERS;
@@ -96,6 +107,12 @@ export default function ConsumerDashboard() {
 
   return (
     <div className="dashboard-layout">
+      {confirmState && (
+        <ConfirmModal
+          {...confirmState}
+          onCancel={() => setConfirmState(null)}
+        />
+      )}
       {/* Sidebar - Editorial */}
       <aside className="sidebar">
         <div style={{ padding: '0 20px 24px', borderBottom: '1px solid var(--outline-variant)', marginBottom: 12 }}>
